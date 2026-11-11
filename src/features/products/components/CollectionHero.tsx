@@ -27,7 +27,7 @@ export const CollectionHero: React.FC<CollectionHeroProps> = ({ onShopNow }) => 
         <button
           type="button"
           onClick={onShopNow}
-          className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full border border-white/15 bg-gradient-to-b from-neutral-600 via-neutral-900 to-black px-5 text-[13px] font-semibold text-white shadow-[0_5px_16px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-0.5 hover:from-neutral-500 hover:via-neutral-800 hover:to-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2"
+          className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full border border-white/15 bg-[#173b70] px-5 text-[13px] font-semibold text-white shadow-[0_5px_16px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#10284a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2"
         >
           Shop now
           <ArrowRight className="h-4 w-4" strokeWidth={1.8} />

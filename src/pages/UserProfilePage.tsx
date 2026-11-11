@@ -229,7 +229,7 @@ export const UserProfilePage: React.FC = () => {
       <UserNavbar />
 
       {/* Main Container */}
-      <main className="flex-1 mx-auto max-w-4xl w-full px-4 sm:px-6 py-8 space-y-6">
+      <main className="flex-1 mx-auto max-w-4xl w-full px-4 sm:px-6 pt-8 pb-28 sm:pb-8 space-y-6">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <Link to="/home" className="flex items-center gap-1 hover:text-brand-600 transition-colors">
@@ -271,7 +271,7 @@ export const UserProfilePage: React.FC = () => {
                 <div className="flex items-center gap-5">
                   {/* Avatar */}
                   <div className="relative group">
-                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden bg-gradient-to-br from-neutral-500 via-neutral-800 to-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_8px_20px_rgba(0,0,0,0.2)] font-extrabold text-2xl flex items-center justify-center shadow-md">
+                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden bg-[#173b70] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_8px_20px_rgba(0,0,0,0.2)] font-extrabold text-2xl flex items-center justify-center shadow-md">
                       {profile?.imageUrl ? (
                         <img
                           src={profile.imageUrl}

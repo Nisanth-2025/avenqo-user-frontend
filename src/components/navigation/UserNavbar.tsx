@@ -72,7 +72,7 @@ export const UserNavbar: React.FC<UserNavbarProps> = ({
     <header className="sticky top-0 z-40 border-b border-neutral-200/60 bg-[#fbfaf8]/95 backdrop-blur-xl">
       <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-3 px-4 sm:h-[76px] sm:px-8">
         <Link to="/home" className="flex min-w-0 flex-shrink-0 items-center gap-2.5 text-neutral-950">
-          <span className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-white/15 bg-gradient-to-b from-neutral-600 via-neutral-900 to-black text-white shadow-[0_4px_12px_rgba(0,0,0,0.2)] sm:h-11 sm:w-11">
+          <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#173b70] text-white shadow-[0_4px_12px_rgba(23,59,112,0.2)] sm:h-11 sm:w-11">
             <ShoppingBag className="h-[21px] w-[21px]" strokeWidth={1.65} />
           </span>
           <span className="flex min-w-0 flex-col">
@@ -89,7 +89,7 @@ export const UserNavbar: React.FC<UserNavbarProps> = ({
               value={inputTerm}
               onChange={(e) => setInputTerm(e.target.value)}
               placeholder="Search..."
-              className="w-full rounded-full border-0 bg-[#efece8] py-2 pl-10 pr-10 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
+              className="w-full rounded-full border-0 bg-[#efece8] py-2 pl-10 pr-10 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-300"
             />
             {inputTerm && (
               <button
@@ -182,7 +182,7 @@ export const UserNavbar: React.FC<UserNavbarProps> = ({
               value={inputTerm}
               onChange={(e) => setInputTerm(e.target.value)}
               placeholder="Search..."
-              className="w-full rounded-full border-0 bg-[#efece8] py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
+              className="w-full rounded-full border-0 bg-[#efece8] py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
             />
           </form>
         </div>

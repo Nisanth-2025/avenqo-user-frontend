@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Home, MapPin, Search, User, X, type LucideIcon } from 'lucide-react';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { Search, X } from 'lucide-react';
 import { CollectionHero } from '../features/products/components/CollectionHero';
 import { UserNavbar } from '../components/navigation/UserNavbar';
 import { useCategories } from '../features/categories/hooks/useCategories';
@@ -11,6 +11,7 @@ import { ProductDTO, ProductQueryParams } from '../types/product.types';
 
 export const HomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const catalogRef = useRef<HTMLElement>(null);
 
@@ -36,6 +37,15 @@ export const HomePage: React.FC = () => {
     setDraft(queryParam);
     setSelectedCategoryId(categoryParam);
   }, [queryParam, categoryParam]);
+
+  useEffect(() => {
+    if (location.hash !== '#search') return;
+
+    requestAnimationFrame(() => {
+      searchInputRef.current?.focus({ preventScroll: true });
+      searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }, [location.hash]);
 
   const { data: categoryData, isLoading: categoriesLoading } = useCategories({
     pageSize: 50,
@@ -109,6 +119,7 @@ export const HomePage: React.FC = () => {
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-4 sm:px-8 sm:pb-16 sm:pt-8">
         <form
+          id="search"
           className="relative mt-1 sm:mt-4"
           onSubmit={(event) => {
             event.preventDefault();
@@ -122,7 +133,7 @@ export const HomePage: React.FC = () => {
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             placeholder="Search products or categories..."
-            className="h-12 w-full rounded-full border border-neutral-100 bg-[#f0efed] pl-12 pr-11 text-[14px] text-neutral-900 placeholder:text-neutral-500 shadow-[inset_0_1px_1px_rgba(0,0,0,0.025)] transition focus:outline-none focus:ring-2 focus:ring-neutral-900/10 sm:text-base"
+            className="h-12 w-full rounded-full border border-slate-200 bg-[#f0efed] pl-12 pr-11 text-[16px] text-neutral-900 placeholder:text-neutral-500 shadow-[inset_0_1px_1px_rgba(0,0,0,0.025)] transition focus:outline-none focus:ring-2 focus:ring-brand-300 sm:text-base"
           />
           {draft && (
             <button
@@ -293,25 +304,6 @@ export const HomePage: React.FC = () => {
         </section>
       </main>
 
-      <nav aria-label="Main navigation" className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200/70 bg-white/95 shadow-[0_-8px_28px_rgba(31,29,25,0.07)] backdrop-blur-xl sm:hidden">
-        <div className="mx-auto flex max-w-md items-end justify-between px-7 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
-          <NavItem to="/home" icon={Home} label="Home" active />
-          <button
-            type="button"
-            onClick={() => {
-              searchInputRef.current?.focus();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="flex min-w-[48px] flex-col items-center gap-1 pb-1 text-[10px] font-medium text-neutral-500 transition hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-          >
-            <Search className="h-5 w-5" strokeWidth={1.6} />
-            Search
-          </button>
-          <NavItem to="/addresses" icon={MapPin} label="Addresses" />
-          <NavItem to="/profile" icon={User} label="Account" />
-        </div>
-      </nav>
-
       <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
     </div>
   );
@@ -336,7 +328,7 @@ function CategoryCircle({
     >
       <span
         className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#eceae6] text-sm text-neutral-600 transition duration-200 sm:h-[88px] sm:w-[88px] ${
-          selected ? 'ring-2 ring-neutral-950 ring-offset-2 ring-offset-[#fbfaf8]' : 'hover:scale-[1.03]'
+          selected ? 'ring-2 ring-brand-700 ring-offset-2 ring-offset-[#fbfaf8]' : 'hover:scale-[1.03]'
         }`}
       >
         {imageUrl ? (
@@ -347,39 +339,6 @@ function CategoryCircle({
       </span>
       <span className="w-full truncate text-center text-[11px] text-neutral-600">{label}</span>
     </button>
-  );
-}
-
-function NavItem({
-  to,
-  icon: Icon,
-  label,
-  active = false,
-}: {
-  to: string;
-  icon: LucideIcon;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <Link
-      to={to}
-      aria-current={active ? 'page' : undefined}
-      className={`flex min-w-[48px] flex-col items-center gap-1 pb-1 text-[10px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 ${
-        active ? 'text-neutral-950' : 'text-neutral-500 hover:text-neutral-950'
-      }`}
-    >
-      <span
-        className={
-          active
-            ? 'relative flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-gradient-to-b from-neutral-600 via-neutral-900 to-black text-white shadow-[0_5px_14px_rgba(0,0,0,0.28)] before:absolute before:inset-x-2 before:top-1 before:h-3 before:rounded-full before:bg-white/20 before:blur-[2px]'
-            : ''
-        }
-      >
-        <Icon className="h-5 w-5" strokeWidth={1.5} />
-      </span>
-      {label}
-    </Link>
   );
 }
 
