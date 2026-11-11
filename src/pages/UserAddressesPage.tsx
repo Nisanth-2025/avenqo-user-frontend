@@ -287,7 +287,7 @@ export const UserAddressesPage: React.FC = () => {
       <UserNavbar />
 
       {/* Main Container */}
-      <main className="flex-1 mx-auto max-w-4xl w-full px-4 sm:px-6 py-8 space-y-6">
+      <main className="flex-1 mx-auto max-w-4xl w-full px-4 sm:px-6 pt-8 pb-28 sm:pb-8 space-y-6">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <Link to="/home" className="flex items-center gap-1 hover:text-brand-600 transition-colors">
@@ -403,7 +403,7 @@ export const UserAddressesPage: React.FC = () => {
 
                     <div className="flex items-center gap-1.5">
                       {addr.defaultShipping && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-gradient-to-b from-neutral-600 via-neutral-900 to-black px-2 py-0.5 text-[10px] font-bold text-white shadow-[0_3px_10px_rgba(0,0,0,0.16)]">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[#173b70] bg-[#173b70] px-2 py-0.5 text-[10px] font-bold text-white shadow-[0_3px_10px_rgba(23,59,112,0.18)]">
                           <Truck className="h-3 w-3" /> Default Shipping
                         </span>
                       )}

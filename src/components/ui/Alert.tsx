@@ -21,7 +21,7 @@ export const Alert: React.FC<AlertProps> = ({
   const dismissFn = onDismiss || onClose;
 
   const styles = {
-    success: { bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-700', Icon: CheckCircle2 },
+    success: { bg: 'bg-blue-50 border-blue-200', text: 'text-blue-800', Icon: CheckCircle2 },
     error: { bg: 'bg-red-50 border-red-200', text: 'text-red-700', Icon: AlertCircle },
     info: { bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700', Icon: Info },
   };
