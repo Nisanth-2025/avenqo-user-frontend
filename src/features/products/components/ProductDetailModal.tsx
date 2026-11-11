@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ProductDTO } from '../../../types/product.types';
-import { X } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, X } from 'lucide-react';
+import { Alert } from '../../../components/ui/Alert';
+import { Button } from '../../../components/ui/Button';
+import { useAddToCart } from '../../cart/hooks/useCart';
 
 interface ProductDetailModalProps {
   product: ProductDTO | null;
@@ -20,9 +24,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onClose,
 }) => {
   const [activeImgIndex, setActiveImgIndex] = useState(0);
+  const [addQuantity, setAddQuantity] = useState(1);
+  const [cartFeedback, setCartFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const addToCart = useAddToCart();
 
   useEffect(() => {
     setActiveImgIndex(0);
+    setAddQuantity(1);
+    setCartFeedback(null);
+    addToCart.reset();
   }, [product?.productId]);
 
   if (!product) return null;
@@ -30,7 +40,23 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const images = product.images || [];
   const activeImg = images[activeImgIndex] || images[0];
   const hasDiscount = product.discount > 0;
-  const isOutOfStock = product.quantity === 0;
+  const isOutOfStock = product.quantity <= 0;
+
+  const handleAddToCart = () => {
+    setCartFeedback(null);
+    addToCart.mutate(
+      { productId: product.productId, quantity: addQuantity },
+      {
+        onSuccess: () => {
+          setCartFeedback({
+            type: 'success',
+            message: `${addQuantity} ${addQuantity === 1 ? 'item' : 'items'} added to your cart.`,
+          });
+        },
+        onError: (error) => setCartFeedback({ type: 'error', message: error.message }),
+      },
+    );
+  };
 
   return (
     <div
@@ -148,6 +174,59 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   </p>
                 </div>
               )}
+
+              <div className="mt-7 border-t border-neutral-200/80 pt-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-neutral-900">Quantity</p>
+                    <p className="mt-0.5 text-xs text-neutral-500">
+                      {isOutOfStock ? 'Currently unavailable' : `${product.quantity} available`}
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center rounded-xl border border-neutral-200 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setAddQuantity((current) => Math.max(1, current - 1))}
+                      disabled={isOutOfStock || addQuantity <= 1 || addToCart.isPending}
+                      aria-label="Decrease quantity"
+                      className="flex size-10 items-center justify-center rounded-l-xl text-neutral-600 transition hover:bg-blue-50 hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Minus className="size-4" />
+                    </button>
+                    <span className="min-w-9 text-center text-sm font-semibold tabular-nums" aria-live="polite">{addQuantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setAddQuantity((current) => Math.min(product.quantity, current + 1))}
+                      disabled={isOutOfStock || addQuantity >= product.quantity || addToCart.isPending}
+                      aria-label="Increase quantity"
+                      className="flex size-10 items-center justify-center rounded-r-xl text-neutral-600 transition hover:bg-blue-50 hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Plus className="size-4" />
+                    </button>
+                  </div>
+                </div>
+                <Button
+                  fullWidth
+                  className="mt-4"
+                  disabled={isOutOfStock}
+                  isLoading={addToCart.isPending}
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="size-4" />
+                  {isOutOfStock ? 'Out of stock' : 'Add to cart'}
+                </Button>
+                {cartFeedback?.type === 'error' && (
+                  <div className="mt-3" role="alert">
+                    <Alert type="error" message={cartFeedback.message} />
+                  </div>
+                )}
+                {cartFeedback?.type === 'success' && (
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2" role="status">
+                    <span className="text-xs font-medium text-blue-800">{cartFeedback.message}</span>
+                    <Link to="/cart" className="text-xs font-semibold text-[#2563EB] underline underline-offset-2">View cart</Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

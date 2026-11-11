@@ -4,6 +4,7 @@ import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import UserProfilePage from './pages/UserProfilePage';
 import UserAddressesPage from './pages/UserAddressesPage';
+import CartPage from './pages/CartPage';
 import { MobileBottomNav } from './components/navigation/MobileBottomNav';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/profile" element={<UserProfilePage />} />
           <Route path="/addresses" element={<UserAddressesPage />} />
+          <Route path="/cart" element={<CartPage />} />
         </Route>
 
         {/* Fallback redirects */}

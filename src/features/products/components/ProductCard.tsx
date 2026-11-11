@@ -41,7 +41,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) =>
           </div>
         )}
         {hasDiscount && !isOutOfStock && (
-          <span className="absolute left-2 top-2 rounded-full border border-white/15 bg-[#173b70] px-2.5 py-1 text-[9px] font-semibold tracking-wide text-white shadow-[0_3px_10px_rgba(0,0,0,0.18)] sm:text-[10px]">
+          <span className="absolute left-2 top-2 rounded-full border border-white/15 bg-[#2563EB] px-2.5 py-1 text-[9px] font-semibold tracking-wide text-white shadow-[0_3px_10px_rgba(0,0,0,0.18)] sm:text-[10px]">
             {Math.round(product.discount)}% OFF
           </span>
         )}

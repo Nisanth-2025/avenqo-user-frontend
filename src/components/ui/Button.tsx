@@ -29,7 +29,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variants = {
     primary:
-      'border border-[#173b70] bg-[#173b70] text-white hover:bg-[#10284a] focus:ring-brand-500 shadow-[0_5px_14px_rgba(16,40,74,0.18)] active:scale-[0.98]',
+      'border border-[#2563EB] bg-[#2563EB] text-white hover:bg-blue-700 focus:ring-brand-500 shadow-[0_5px_14px_rgba(37,99,235,0.18)] active:scale-[0.98]',
     secondary:
       'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 focus:ring-brand-500 shadow-input',
     ghost: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:ring-gray-400',

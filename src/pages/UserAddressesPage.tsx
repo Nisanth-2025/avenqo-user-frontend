@@ -403,7 +403,7 @@ export const UserAddressesPage: React.FC = () => {
 
                     <div className="flex items-center gap-1.5">
                       {addr.defaultShipping && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-[#173b70] bg-[#173b70] px-2 py-0.5 text-[10px] font-bold text-white shadow-[0_3px_10px_rgba(23,59,112,0.18)]">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[#2563EB] bg-[#2563EB] px-2 py-0.5 text-[10px] font-bold text-white shadow-[0_3px_10px_rgba(37,99,235,0.18)]">
                           <Truck className="h-3 w-3" /> Default Shipping
                         </span>
                       )}
