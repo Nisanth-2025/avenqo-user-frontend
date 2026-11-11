@@ -430,7 +430,7 @@ function NavItem({
       <span
         className={
           active
-            ? 'flex h-11 w-11 items-center justify-center rounded-full bg-neutral-900 text-white'
+            ? 'relative flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-gradient-to-b from-neutral-600 via-neutral-900 to-black text-white shadow-[0_5px_14px_rgba(0,0,0,0.28)] before:absolute before:inset-x-2 before:top-1 before:h-3 before:rounded-full before:bg-white/20 before:blur-[2px]'
             : ''
         }
       >
