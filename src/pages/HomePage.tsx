@@ -1,20 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Home, MapPin, Search, User, X, type LucideIcon } from 'lucide-react';
+import { CollectionHero } from '../features/products/components/CollectionHero';
 import { UserNavbar } from '../components/navigation/UserNavbar';
 import { useCategories } from '../features/categories/hooks/useCategories';
 import { useBrowseProducts } from '../features/products/hooks/useProducts';
 import { ProductCard } from '../features/products/components/ProductCard';
 import { ProductDetailModal } from '../features/products/components/ProductDetailModal';
 import { ProductDTO, ProductQueryParams } from '../types/product.types';
-import { useAuth } from '../features/auth/hooks/useAuth';
-import { useUserProfile } from '../features/profile/hooks/useUserProfile';
 
 export const HomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useAuth();
-  const { profile } = useUserProfile();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const catalogRef = useRef<HTMLElement>(null);
 
   const queryParam = searchParams.get('q') || '';
   const categoryParam = searchParams.get('category')
@@ -90,6 +88,7 @@ export const HomePage: React.FC = () => {
   };
 
   const categories = categoryData?.content || [];
+  const visibleCategories = categoriesExpanded ? categories : categories.slice(0, 5);
   const products = productData?.content || [];
   const totalElements = productData?.totalElements || 0;
   const totalPages = productData?.totalPages || 1;
@@ -97,18 +96,6 @@ export const HomePage: React.FC = () => {
   const activeCategory = categories.find((c) => c.categoryId === selectedCategoryId);
 
   const browsingCatalog = !keyword && !selectedCategoryId;
-  const featured =
-    browsingCatalog && !productsLoading
-      ? products.find((product) => product.images?.length) || products[0]
-      : undefined;
-  const featuredImage =
-    featured?.images?.find((img) => img.primaryImage) || featured?.images?.[0];
-
-  const firstName =
-    profile?.firstName ||
-    profile?.username ||
-    user?.email?.split('@')[0] ||
-    'there';
 
   const sectionTitle = keyword
     ? `Results for “${keyword}”`
@@ -117,43 +104,25 @@ export const HomePage: React.FC = () => {
       : 'Latest arrivals';
 
   return (
-    <div className="min-h-screen bg-[#f7f5f2] text-neutral-900">
+    <div className="min-h-screen bg-[#fbfaf8] text-neutral-950">
       <UserNavbar showSearch={false} />
 
-      <main className="mx-auto w-full max-w-6xl px-5 pb-28 pt-6 sm:px-8 sm:pb-16 sm:pt-8">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/profile"
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eceae6] text-sm text-neutral-700"
-            aria-label="Open profile"
-          >
-            {profile?.imageUrl ? (
-              <img src={profile.imageUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              firstName.charAt(0).toUpperCase()
-            )}
-          </Link>
-          <div className="min-w-0">
-            <p className="truncate text-[15px] font-medium leading-tight">Hi, {firstName}</p>
-            <p className="mt-0.5 text-xs text-neutral-500">Browse the marketplace</p>
-          </div>
-        </div>
-
+      <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-4 sm:px-8 sm:pb-16 sm:pt-8">
         <form
-          className="relative mt-5"
+          className="relative mt-1 sm:mt-4"
           onSubmit={(event) => {
             event.preventDefault();
             handleSearch(draft.trim());
           }}
         >
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-neutral-900" />
           <input
             ref={searchInputRef}
             type="text"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            placeholder="Search..."
-            className="w-full rounded-full border-0 bg-[#efece8] py-3 pl-11 pr-11 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
+            placeholder="Search products or categories..."
+            className="h-12 w-full rounded-full border border-neutral-100 bg-[#f0efed] pl-12 pr-11 text-[14px] text-neutral-900 placeholder:text-neutral-500 shadow-[inset_0_1px_1px_rgba(0,0,0,0.025)] transition focus:outline-none focus:ring-2 focus:ring-neutral-900/10 sm:text-base"
           />
           {draft && (
             <button
@@ -167,14 +136,14 @@ export const HomePage: React.FC = () => {
           )}
         </form>
 
-        <section className="mt-10">
+        <section className="mt-7 sm:mt-10">
           <div className="mb-4 flex items-baseline justify-between">
-            <h2 className="text-[15px] font-medium">Shop by categories</h2>
+            <h2 className="text-[19px] font-semibold tracking-tight sm:text-2xl">Shop by categories</h2>
             {categories.length > 5 && (
               <button
                 type="button"
                 onClick={() => setCategoriesExpanded((open) => !open)}
-                className="text-sm text-neutral-500 hover:text-neutral-900"
+                className="inline-flex items-center gap-1 text-[13px] font-medium text-neutral-600 transition hover:text-neutral-950"
               >
                 {categoriesExpanded ? 'Show less' : 'See all'}
               </button>
@@ -184,23 +153,18 @@ export const HomePage: React.FC = () => {
           <div
             className={
               categoriesExpanded
-                ? 'flex flex-wrap gap-x-5 gap-y-6'
-                : 'flex gap-5 overflow-x-auto pb-1 no-scrollbar'
+                ? 'flex flex-wrap gap-x-4 gap-y-5'
+                : 'flex gap-4 overflow-x-auto pb-2 no-scrollbar sm:gap-6'
             }
           >
-            <CategoryCircle
-              label="All"
-              selected={selectedCategoryId === null && !keyword}
-              onClick={() => handleSelectCategory(null)}
-            />
             {categoriesLoading
               ? Array.from({ length: 5 }).map((_, index) => (
-                  <div key={index} className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2">
-                    <div className="h-[72px] w-[72px] animate-pulse rounded-full bg-[#eceae6]" />
+                  <div key={index} className="flex w-14 flex-shrink-0 flex-col items-center gap-2 sm:w-[88px]">
+                    <div className="h-14 w-14 animate-pulse rounded-full bg-[#eceae6] sm:h-[88px] sm:w-[88px]" />
                     <div className="h-2 w-12 animate-pulse rounded bg-[#eceae6]" />
                   </div>
                 ))
-              : categories.map((category) => (
+              : visibleCategories.map((category) => (
                   <CategoryCircle
                     key={category.categoryId}
                     label={category.categoryName}
@@ -213,45 +177,19 @@ export const HomePage: React.FC = () => {
         </section>
 
         {browsingCatalog && (
-          <section className="mt-10">
-            {productsLoading ? (
-              <div className="h-[340px] animate-pulse rounded-2xl bg-[#eceae6] sm:h-[400px]" />
-            ) : featured ? (
-              <button
-                type="button"
-                onClick={() => setSelectedProduct(featured)}
-                className="relative block h-[340px] w-full overflow-hidden rounded-2xl bg-[#e7e2da] text-left sm:h-[420px]"
-              >
-                {featuredImage && (
-                  <img
-                    src={featuredImage.imageUrl}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover object-[center_20%]"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/15 to-transparent" />
-                <div className="relative z-10 px-7 pt-10 sm:px-12 sm:pt-14">
-                  <p className="max-w-[16rem] text-3xl font-medium leading-tight tracking-tight text-white sm:max-w-sm sm:text-4xl">
-                    {featured.productName}
-                  </p>
-                  <span className="mt-5 inline-flex w-fit rounded-full bg-white px-5 py-2 text-sm text-neutral-900">
-                    Shop now
-                  </span>
-                </div>
-                <p className="pointer-events-none absolute inset-x-4 bottom-[-0.12em] text-center font-display text-7xl leading-none text-white sm:text-[7.25rem]">
-                  Avenquo
-                </p>
-              </button>
-            ) : null}
-          </section>
+          <div className="mt-7 sm:mt-10">
+            <CollectionHero
+              onShopNow={() => catalogRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            />
+          </div>
         )}
 
-        <section className="mt-10">
-          <div className="mb-5 flex items-end justify-between gap-4">
+        <section ref={catalogRef} className="mt-8 scroll-mt-24 sm:mt-10">
+          <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <h2 className="text-[15px] font-medium">{sectionTitle}</h2>
-              <p className="mt-1 text-xs text-neutral-500">
-                {productsLoading ? 'Loading' : `${totalElements} ${totalElements === 1 ? 'piece' : 'pieces'}`}
+              <h2 className="text-[19px] font-semibold tracking-tight sm:text-2xl">{sectionTitle}</h2>
+              <p className="mt-1 text-[11px] text-neutral-500">
+                {productsLoading ? 'Finding pieces for you…' : `${totalElements} ${totalElements === 1 ? 'piece' : 'pieces'}`}
               </p>
             </div>
             <label className="flex items-center gap-2 text-xs text-neutral-500">
@@ -265,7 +203,7 @@ export const HomePage: React.FC = () => {
                   ];
                   setQueryParams((prev) => ({ ...prev, sortBy, sortOrder, pageNumber: 0 }));
                 }}
-                className="bg-transparent py-1 text-xs text-neutral-700 focus:outline-none"
+                className="rounded-full bg-[#f0efed] px-3 py-1.5 text-xs font-medium text-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
               >
                 <option value="createdAt-desc">Newest</option>
                 <option value="createdAt-asc">Oldest</option>
@@ -355,19 +293,22 @@ export const HomePage: React.FC = () => {
         </section>
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200/80 bg-[#f7f5f2]/95 backdrop-blur sm:hidden">
-        <div className="mx-auto flex max-w-md items-end justify-between px-8 pb-3 pt-2">
+      <nav aria-label="Main navigation" className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200/70 bg-white/95 shadow-[0_-8px_28px_rgba(31,29,25,0.07)] backdrop-blur-xl sm:hidden">
+        <div className="mx-auto flex max-w-md items-end justify-between px-7 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
           <NavItem to="/home" icon={Home} label="Home" active />
           <button
             type="button"
-            onClick={() => searchInputRef.current?.focus()}
-            className="flex flex-col items-center gap-1 pb-1 text-[11px] text-neutral-500"
+            onClick={() => {
+              searchInputRef.current?.focus();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="flex min-w-[48px] flex-col items-center gap-1 pb-1 text-[10px] font-medium text-neutral-500 transition hover:text-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
           >
-            <Search className="h-5 w-5" strokeWidth={1.5} />
+            <Search className="h-5 w-5" strokeWidth={1.6} />
             Search
           </button>
           <NavItem to="/addresses" icon={MapPin} label="Addresses" />
-          <NavItem to="/profile" icon={User} label="Profile" />
+          <NavItem to="/profile" icon={User} label="Account" />
         </div>
       </nav>
 
@@ -391,11 +332,11 @@ function CategoryCircle({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2"
+      className="flex w-14 flex-shrink-0 flex-col items-center gap-2 sm:w-[88px]"
     >
       <span
-        className={`flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full bg-[#eceae6] text-sm text-neutral-600 ${
-          selected ? 'ring-2 ring-neutral-900 ring-offset-2 ring-offset-[#f7f5f2]' : ''
+        className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#eceae6] text-sm text-neutral-600 transition duration-200 sm:h-[88px] sm:w-[88px] ${
+          selected ? 'ring-2 ring-neutral-950 ring-offset-2 ring-offset-[#fbfaf8]' : 'hover:scale-[1.03]'
         }`}
       >
         {imageUrl ? (
@@ -423,8 +364,9 @@ function NavItem({
   return (
     <Link
       to={to}
-      className={`flex flex-col items-center gap-1 pb-1 text-[11px] ${
-        active ? 'text-neutral-900' : 'text-neutral-500'
+      aria-current={active ? 'page' : undefined}
+      className={`flex min-w-[48px] flex-col items-center gap-1 pb-1 text-[10px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 ${
+        active ? 'text-neutral-950' : 'text-neutral-500 hover:text-neutral-950'
       }`}
     >
       <span

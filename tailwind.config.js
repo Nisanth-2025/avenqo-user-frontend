@@ -26,7 +26,7 @@ export default {
         'glass':       '0 8px 32px rgba(0, 0, 0, 0.08)',
         'glass-hover': '0 12px 40px rgba(0, 0, 0, 0.12)',
         'input':       '0 1px 2px rgba(0, 0, 0, 0.05)',
-        'input-focus': '0 0 0 3px rgba(139, 92, 246, 0.15)',
+        'input-focus': '0 0 0 3px rgba(23, 23, 23, 0.14)',
         'card':        '0 4px 24px rgba(0, 0, 0, 0.06)',
         'button':      '0 1px 3px rgba(0, 0, 0, 0.08)',
       },

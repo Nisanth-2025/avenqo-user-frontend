@@ -278,7 +278,7 @@ export const UserAddressesPage: React.FC = () => {
       case 'WORK':
         return <Briefcase className="h-3.5 w-3.5 text-blue-600" />;
       default:
-        return <Building className="h-3.5 w-3.5 text-purple-600" />;
+        return <Building className="h-3.5 w-3.5 text-brand-600" />;
     }
   };
 
@@ -403,7 +403,7 @@ export const UserAddressesPage: React.FC = () => {
 
                     <div className="flex items-center gap-1.5">
                       {addr.defaultShipping && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-gradient-to-b from-neutral-600 via-neutral-900 to-black px-2 py-0.5 text-[10px] font-bold text-white shadow-[0_3px_10px_rgba(0,0,0,0.16)]">
                           <Truck className="h-3 w-3" /> Default Shipping
                         </span>
                       )}
