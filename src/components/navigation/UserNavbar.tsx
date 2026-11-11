@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useUserProfile } from '../../features/profile/hooks/useUserProfile';
-import { Search, User, MapPin, LogOut, X } from 'lucide-react';
+import { Search, User, MapPin, LogOut, ShoppingBag, X } from 'lucide-react';
 
 interface UserNavbarProps {
   onSearch?: (term: string) => void;
@@ -69,10 +69,16 @@ export const UserNavbar: React.FC<UserNavbarProps> = ({
       : profile?.firstName || profile?.username || user?.email?.split('@')[0] || 'Account';
 
   return (
-    <header className="sticky top-0 z-40 border-b border-neutral-200/70 bg-[#f7f5f2]/90 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <Link to="/home" className="flex-shrink-0 text-[15px] font-medium tracking-tight text-neutral-900">
-          Avenquo
+    <header className="sticky top-0 z-40 border-b border-neutral-200/60 bg-[#fbfaf8]/95 backdrop-blur-xl">
+      <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-3 px-4 sm:h-[76px] sm:px-8">
+        <Link to="/home" className="flex min-w-0 flex-shrink-0 items-center gap-2.5 text-neutral-950">
+          <span className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-white/15 bg-gradient-to-b from-neutral-600 via-neutral-900 to-black text-white shadow-[0_4px_12px_rgba(0,0,0,0.2)] sm:h-11 sm:w-11">
+            <ShoppingBag className="h-[21px] w-[21px]" strokeWidth={1.65} />
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-[18px] font-bold leading-none tracking-tight sm:text-[21px]">Avenquo</span>
+            <span className="mt-1 truncate text-[10px] leading-none text-neutral-500 sm:text-xs">Online marketplace</span>
+          </span>
         </Link>
 
         {showSearch && (
@@ -104,22 +110,20 @@ export const UserNavbar: React.FC<UserNavbarProps> = ({
               type="button"
               onClick={() => setIsDropdownOpen((prev) => !prev)}
               aria-expanded={isDropdownOpen}
-              className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 text-left hover:bg-black/[0.03]"
+              aria-label={`Open ${displayName} account menu`}
+              className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-neutral-200/70 bg-[#f0efed] text-neutral-800 transition hover:bg-neutral-200/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
             >
-              <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#eceae6] text-xs text-neutral-700">
+              <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full text-xs text-neutral-700">
                 {profile?.imageUrl ? (
                   <img src={profile.imageUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  displayName.charAt(0).toUpperCase()
+                  <User className="h-5 w-5" strokeWidth={1.6} />
                 )}
-              </span>
-              <span className="hidden max-w-[140px] truncate text-sm text-neutral-800 md:block">
-                {displayName}
               </span>
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute right-0 z-50 mt-2 w-64 rounded-2xl border border-neutral-200/80 bg-white p-2 shadow-sm">
+              <div className="absolute right-0 z-50 mt-2 w-64 rounded-2xl border border-neutral-200/80 bg-white p-2 shadow-[0_16px_44px_rgba(0,0,0,0.14)]">
                 <div className="px-3 py-2">
                   <p className="truncate text-sm text-neutral-900">{displayName}</p>
                   <p className="truncate text-xs text-neutral-500">{user?.email}</p>
