@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useUserProfile } from '../../features/profile/hooks/useUserProfile';
-import { Search, User, MapPin, LogOut, ShoppingBag, X } from 'lucide-react';
+import { Search, User, MapPin, LogOut, ShoppingBag, ShoppingCart, X } from 'lucide-react';
+import { useCart } from '../../features/cart/hooks/useCart';
 
 interface UserNavbarProps {
   onSearch?: (term: string) => void;
@@ -17,6 +18,8 @@ export const UserNavbar: React.FC<UserNavbarProps> = ({
 }) => {
   const { user, logout } = useAuth();
   const { profile } = useUserProfile();
+  const { data: cart } = useCart();
+  const cartCount = cart?.cartItems.reduce((total, item) => total + item.quantity, 0) ?? 0;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -72,7 +75,7 @@ export const UserNavbar: React.FC<UserNavbarProps> = ({
     <header className="sticky top-0 z-40 border-b border-neutral-200/60 bg-[#fbfaf8]/95 backdrop-blur-xl">
       <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-3 px-4 sm:h-[76px] sm:px-8">
         <Link to="/home" className="flex min-w-0 flex-shrink-0 items-center gap-2.5 text-neutral-950">
-          <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#173b70] text-white shadow-[0_4px_12px_rgba(23,59,112,0.2)] sm:h-11 sm:w-11">
+          <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.2)] sm:h-11 sm:w-11">
             <ShoppingBag className="h-[21px] w-[21px]" strokeWidth={1.65} />
           </span>
           <span className="flex min-w-0 flex-col">
@@ -105,6 +108,18 @@ export const UserNavbar: React.FC<UserNavbarProps> = ({
         )}
 
         <div className="flex items-center gap-2">
+          <Link
+            to="/cart"
+            aria-label={cartCount > 0 ? `Cart, ${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : 'Cart'}
+            className="relative hidden size-10 shrink-0 items-center justify-center rounded-full border border-neutral-200/70 bg-white text-neutral-600 transition hover:bg-blue-50 hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2 sm:flex"
+          >
+            <ShoppingCart className="size-5" strokeWidth={1.7} />
+            {cartCount > 0 && (
+              <span aria-hidden="true" className="absolute -right-1 -top-1 min-w-4 rounded-full bg-[#2563EB] px-1 text-center text-[9px] font-bold leading-4 text-white">
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            )}
+          </Link>
           <div className="relative" ref={dropdownRef}>
             <button
               type="button"

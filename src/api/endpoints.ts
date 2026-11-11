@@ -27,6 +27,11 @@ export const API_ENDPOINTS = {
     PHONE:              '/api/v1/user/profile/phone',
     IMAGE:              '/api/v1/user/profile/image',
   },
+  CART: {
+    BASE:               '/api/v1/cart',
+    PRODUCT_QUANTITY:   (productId: number | string, quantity: number) => `/api/v1/cart/products/${productId}/quantity/${quantity}`,
+    PRODUCT:            (productId: number | string) => `/api/v1/cart/products/${productId}`,
+  },
   ADDRESSES: {
     BASE:               '/api/v1/addresses',
     BY_ID:              (addressId: number | string) => `/api/v1/addresses/${addressId}`,

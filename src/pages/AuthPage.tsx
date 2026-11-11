@@ -171,7 +171,7 @@ const AuthPage: React.FC = () => {
       <div className="w-full max-w-md animate-fade-in">
         {/* ── Logo ── */}
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-700 shadow-lg shadow-brand-500/25 mb-4">
+          <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-[#2563EB] shadow-lg shadow-blue-500/25 mb-4">
             <Sparkles className="h-7 w-7 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Avenquo</h1>

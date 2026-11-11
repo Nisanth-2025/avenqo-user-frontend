@@ -271,7 +271,7 @@ export const UserProfilePage: React.FC = () => {
                 <div className="flex items-center gap-5">
                   {/* Avatar */}
                   <div className="relative group">
-                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden bg-[#173b70] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_8px_20px_rgba(0,0,0,0.2)] font-extrabold text-2xl flex items-center justify-center shadow-md">
+                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden bg-[#2563EB] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_8px_20px_rgba(0,0,0,0.2)] font-extrabold text-2xl flex items-center justify-center shadow-md">
                       {profile?.imageUrl ? (
                         <img
                           src={profile.imageUrl}

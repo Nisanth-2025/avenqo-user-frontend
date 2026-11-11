@@ -19,7 +19,7 @@ export const Badge: React.FC<BadgeProps> = ({
   const variants = {
     gray:  'bg-gray-100 text-gray-700 border-gray-200',
     brand: 'bg-brand-50 text-brand-700 border-brand-200',
-    green: 'bg-[#173b70] text-white border-[#173b70] shadow-[0_3px_10px_rgba(23,59,112,0.18)]',
+    green: 'bg-[#2563EB] text-white border-[#2563EB] shadow-[0_3px_10px_rgba(37,99,235,0.18)]',
     amber: 'bg-amber-50 text-amber-700 border-amber-200',
     blue:  'bg-blue-50 text-blue-700 border-blue-200',
     red:   'bg-red-50 text-red-700 border-red-200',
