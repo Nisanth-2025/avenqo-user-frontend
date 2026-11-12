@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { Search, X } from 'lucide-react';
+import { ChevronDown, Grid2X2, Search, SlidersHorizontal, X } from 'lucide-react';
 import { CollectionHero } from '../features/products/components/CollectionHero';
 import { UserNavbar } from '../components/navigation/UserNavbar';
 import { useCategories } from '../features/categories/hooks/useCategories';
@@ -111,7 +111,7 @@ export const HomePage: React.FC = () => {
     ? `Results for “${keyword}”`
     : activeCategory
       ? activeCategory.categoryName
-      : 'Latest arrivals';
+      : 'All products';
 
   return (
     <div className="min-h-screen bg-[#fbfaf8] text-neutral-950">
@@ -168,6 +168,12 @@ export const HomePage: React.FC = () => {
                 : 'flex gap-4 overflow-x-auto pb-2 no-scrollbar sm:gap-6'
             }
           >
+            <CategoryCircle
+              label="All categories"
+              isAllCategories
+              selected={!selectedCategoryId}
+              onClick={() => handleSelectCategory(null)}
+            />
             {categoriesLoading
               ? Array.from({ length: 5 }).map((_, index) => (
                   <div key={index} className="flex w-14 flex-shrink-0 flex-col items-center gap-2 sm:w-[88px]">
@@ -203,27 +209,32 @@ export const HomePage: React.FC = () => {
                 {productsLoading ? 'Finding pieces for you…' : `${totalElements} ${totalElements === 1 ? 'piece' : 'pieces'}`}
               </p>
             </div>
-            <label className="flex items-center gap-2 text-xs text-neutral-500">
-              <span className="hidden sm:inline">Sort</span>
-              <select
-                value={`${queryParams.sortBy}-${queryParams.sortOrder}`}
-                onChange={(event) => {
-                  const [sortBy, sortOrder] = event.target.value.split('-') as [
-                    'productId' | 'productName' | 'price' | 'specialPrice' | 'createdAt',
-                    'asc' | 'desc',
-                  ];
-                  setQueryParams((prev) => ({ ...prev, sortBy, sortOrder, pageNumber: 0 }));
-                }}
-                className="rounded-full bg-[#f0efed] px-3 py-1.5 text-xs font-medium text-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
-              >
-                <option value="createdAt-desc">Newest</option>
-                <option value="createdAt-asc">Oldest</option>
-                <option value="price-asc">Price, low to high</option>
-                <option value="price-desc">Price, high to low</option>
-                <option value="productName-asc">Name, A to Z</option>
-                <option value="productName-desc">Name, Z to A</option>
-              </select>
-            </label>
+            <div className="flex shrink-0 items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-2.5 py-1.5 shadow-[0_2px_8px_rgba(31,29,25,0.04)] sm:gap-2 sm:px-3">
+              <SlidersHorizontal className="size-3.5 text-[#2563EB]" aria-hidden="true" />
+              <span className="text-[10px] font-medium text-neutral-500 sm:text-xs">Sort</span>
+              <label className="relative flex items-center">
+                <span className="sr-only">Sort products by</span>
+                <select
+                  value={`${queryParams.sortBy}-${queryParams.sortOrder}`}
+                  onChange={(event) => {
+                    const [sortBy, sortOrder] = event.target.value.split('-') as [
+                      'productId' | 'productName' | 'price' | 'specialPrice' | 'createdAt',
+                      'asc' | 'desc',
+                    ];
+                    setQueryParams((prev) => ({ ...prev, sortBy, sortOrder, pageNumber: 0 }));
+                  }}
+                  className="max-w-[106px] appearance-none bg-transparent py-1 pl-0.5 pr-5 text-[11px] font-semibold text-neutral-900 outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] sm:max-w-none sm:text-xs"
+                >
+                  <option value="createdAt-desc">Newest</option>
+                  <option value="createdAt-asc">Oldest</option>
+                  <option value="price-asc">Price: low to high</option>
+                  <option value="price-desc">Price: high to low</option>
+                  <option value="productName-asc">Name: A to Z</option>
+                  <option value="productName-desc">Name: Z to A</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-0 size-3.5 text-neutral-500" aria-hidden="true" />
+              </label>
+            </div>
           </div>
 
           {productsLoading ? (
@@ -313,31 +324,47 @@ function CategoryCircle({
   label,
   imageUrl,
   selected,
+  isAllCategories = false,
   onClick,
 }: {
   label: string;
   imageUrl?: string | null;
   selected?: boolean;
+  isAllCategories?: boolean;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-14 flex-shrink-0 flex-col items-center gap-2 sm:w-[88px]"
+      aria-label={label}
+      aria-pressed={selected}
+      className={`flex flex-shrink-0 flex-col items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2 ${
+        isAllCategories ? 'w-[72px] sm:w-[88px]' : 'w-14 sm:w-[88px]'
+      }`}
     >
       <span
-        className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#eceae6] text-sm text-neutral-600 transition duration-200 sm:h-[88px] sm:w-[88px] ${
-          selected ? 'ring-2 ring-brand-700 ring-offset-2 ring-offset-[#fbfaf8]' : 'hover:scale-[1.03]'
+        className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#eceae6] text-sm text-neutral-600 transition duration-200 motion-reduce:transition-none sm:h-[88px] sm:w-[88px] ${
+          selected
+            ? 'bg-blue-50 text-[#2563EB] ring-2 ring-[#2563EB] ring-offset-2 ring-offset-[#fbfaf8]'
+            : 'hover:scale-[1.03]'
         }`}
       >
-        {imageUrl ? (
+        {isAllCategories ? (
+          <Grid2X2 className="size-5" aria-hidden="true" />
+        ) : imageUrl ? (
           <img src={imageUrl} alt="" className="h-full w-full object-cover" />
         ) : (
           label.charAt(0).toUpperCase()
         )}
       </span>
-      <span className="w-full truncate text-center text-[11px] text-neutral-600">{label}</span>
+      <span
+        className={`w-full text-center text-[10px] leading-tight text-neutral-600 sm:text-[11px] ${
+          isAllCategories ? 'whitespace-normal' : 'truncate'
+        }`}
+      >
+        {label}
+      </span>
     </button>
   );
 }
