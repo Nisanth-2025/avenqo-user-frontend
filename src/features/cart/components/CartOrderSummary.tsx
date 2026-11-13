@@ -20,8 +20,14 @@ export const CartOrderSummary: React.FC<{ total: number }> = ({ total }) => (
       Prices and stock are current estimates. They will be checked again at checkout.
     </p>
     <Link
+      to="/checkout"
+      className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white shadow-[0_5px_14px_rgba(37,99,235,0.18)] transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2"
+    >
+      Proceed to checkout
+    </Link>
+    <Link
       to="/home"
-      className="mt-4 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+      className="mt-2 inline-flex min-h-9 w-full items-center justify-center rounded-xl px-4 text-xs font-medium text-neutral-500 transition hover:bg-blue-50 hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2"
     >
       Continue shopping
     </Link>
