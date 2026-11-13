@@ -27,6 +27,13 @@ export const API_ENDPOINTS = {
     PHONE:              '/api/v1/user/profile/phone',
     IMAGE:              '/api/v1/user/profile/image',
   },
+  ORDERS: {
+    CHECKOUT:           '/api/v1/orders/checkout',
+  },
+  PAYMENTS: {
+    INITIATE_ORDER:     (orderId: number | string) => `/api/v1/payments/orders/${orderId}`,
+    VERIFY:             '/api/v1/payments/verify',
+  },
   CART: {
     BASE:               '/api/v1/cart',
     PRODUCT_QUANTITY:   (productId: number | string, quantity: number) => `/api/v1/cart/products/${productId}/quantity/${quantity}`,
