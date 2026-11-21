@@ -6,6 +6,9 @@ import type {
   VerifyOtpRequestDTO,
   RefreshTokenRequestDTO,
   AuthenticationResponseDTO,
+  PasswordLoginRequestDTO,
+  PasswordRequestDTO,
+  SessionPageResponseDTO,
 } from '../../../types/auth.types';
 
 export const authService = {
@@ -42,6 +45,69 @@ export const authService = {
         API_ENDPOINTS.AUTH.VERIFY_SIGNIN_OTP,
         dto,
       );
+      return response.data;
+    } catch (err) {
+      throw extractApiError(err);
+    }
+  },
+
+  async passwordLogin(dto: PasswordLoginRequestDTO): Promise<AuthenticationResponseDTO> {
+    try {
+      const response = await apiAxios.post<AuthenticationResponseDTO>(
+        API_ENDPOINTS.AUTH.PASSWORD_LOGIN,
+        dto,
+      );
+      return response.data;
+    } catch (err) {
+      throw extractApiError(err);
+    }
+  },
+
+  async setPassword(dto: PasswordRequestDTO): Promise<string> {
+    try {
+      const response = await apiAxios.post<string>(API_ENDPOINTS.AUTH.SET_PASSWORD, dto);
+      return response.data;
+    } catch (err) {
+      throw extractApiError(err);
+    }
+  },
+
+  async changePassword(dto: PasswordRequestDTO): Promise<string> {
+    try {
+      const response = await apiAxios.put<string>(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, dto);
+      return response.data;
+    } catch (err) {
+      throw extractApiError(err);
+    }
+  },
+
+  async logout(tokenHash: string, accessToken: string): Promise<string> {
+    try {
+      const response = await apiAxios.post<string>(
+        API_ENDPOINTS.AUTH.LOGOUT,
+        { tokenHash },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      return response.data;
+    } catch (err) {
+      throw extractApiError(err);
+    }
+  },
+
+  async listSessions(page = 0, size = 10): Promise<SessionPageResponseDTO> {
+    try {
+      const response = await apiAxios.get<SessionPageResponseDTO>(API_ENDPOINTS.AUTH.SESSIONS, {
+        params: { page, size },
+      });
+      return response.data;
+    } catch (err) {
+      throw extractApiError(err);
+    }
+  },
+
+  async revokeSession(sessionId: number): Promise<string> {
+    try {
+      const response = await apiAxios.delete<string>(API_ENDPOINTS.AUTH.SESSION_BY_ID(sessionId));
       return response.data;
     } catch (err) {
       throw extractApiError(err);

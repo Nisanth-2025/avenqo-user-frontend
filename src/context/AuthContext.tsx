@@ -66,11 +66,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const logout = useCallback(() => {
+    const currentRefreshToken = tokenStorage.getRefreshToken();
+    const currentAccessToken = tokenStorage.getAccessToken();
     tokenStorage.clearTokens();
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
     setIsAuthenticated(false);
+    if (currentRefreshToken && currentAccessToken) {
+      void authService.logout(currentRefreshToken, currentAccessToken).catch(() => undefined);
+    }
   }, []);
 
   const refreshSession = useCallback(async (): Promise<boolean> => {

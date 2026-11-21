@@ -76,8 +76,8 @@ export const UserProfilePage: React.FC = () => {
 
   // Save First & Last Name
   const handleSaveName = async () => {
-    if (!firstName.trim()) {
-      setNotice({ type: 'error', message: 'First name is required (max 30 characters).' });
+    if (!firstName.trim() || firstName.trim().length > 30 || lastName.trim().length > 30) {
+      setNotice({ type: 'error', message: 'First name is required; first and last names must be 30 characters or fewer.' });
       return;
     }
     try {
@@ -185,6 +185,16 @@ export const UserProfilePage: React.FC = () => {
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = '';
+    const supportedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!supportedTypes.includes(file.type)) {
+      setNotice({ type: 'error', message: 'Choose a JPEG, PNG, or WebP image.' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setNotice({ type: 'error', message: 'Profile photos must be 5 MB or smaller.' });
+      return;
+    }
     try {
       await uploadImageMutation.mutateAsync(file);
       setNotice({ type: 'success', message: 'Profile photo updated successfully.' });
@@ -296,7 +306,7 @@ export const UserProfilePage: React.FC = () => {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       onChange={handleImageFileChange}
                       className="hidden"
                     />
@@ -378,6 +388,12 @@ export const UserProfilePage: React.FC = () => {
                   )}
                 </div>
               </div>
+              <Link
+                to="/security"
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-brand-300 hover:text-brand-700"
+              >
+                <ShieldCheck className="h-4 w-4" /> Manage password and sessions
+              </Link>
             </div>
 
             {/* Personal Information & Profile Fields */}

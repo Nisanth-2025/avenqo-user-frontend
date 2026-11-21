@@ -15,7 +15,7 @@ import { ApiClientError } from '../api/client';
 import type { AuthMode, AuthStep } from '../types/auth.types';
 
 const emailSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Please enter a valid email'),
+  email: z.string().min(1, 'Email is required').max(254).email('Please enter a valid email'),
 });
 
 type EmailForm = z.infer<typeof emailSchema>;
@@ -51,6 +51,8 @@ const AuthPage: React.FC = () => {
   const [step, setStep] = useState<AuthStep>('email');
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
+  const [password, setPassword] = useState('');
+  const [signInMethod, setSignInMethod] = useState<'otp' | 'password'>('otp');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
@@ -70,6 +72,8 @@ const AuthPage: React.FC = () => {
       setMode(newMode);
       setStep('email');
       setOtp('');
+      setPassword('');
+      setSignInMethod('otp');
       setAlert(null);
       resetForm();
       resetTimers();
@@ -109,6 +113,25 @@ const AuthPage: React.FC = () => {
     },
     [mode, startTimers],
   );
+
+  const onPasswordLogin = useCallback(async (data: EmailForm) => {
+    if (!password.trim()) {
+      setAlert({ type: 'error', message: 'Password is required' });
+      return;
+    }
+    setIsSubmitting(true);
+    setAlert(null);
+    try {
+      const tokens = await authService.passwordLogin({ email: data.email, password });
+      loginWithTokens(tokens);
+      navigate('/home', { replace: true });
+    } catch (err) {
+      const msg = err instanceof ApiClientError ? err.message : 'Sign in failed';
+      setAlert({ type: 'error', message: msg });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [password, loginWithTokens, navigate]);
 
   /* ── verify OTP ── */
   const onVerifyOtp = useCallback(async () => {
@@ -209,12 +232,29 @@ const AuthPage: React.FC = () => {
                 </button>
               </div>
 
+              {isSignin && (
+                <div className="flex rounded-lg bg-gray-100 p-1 mb-5" aria-label="Sign-in method">
+                  <button
+                    type="button"
+                    onClick={() => { setSignInMethod('otp'); setPassword(''); setAlert(null); }}
+                    aria-pressed={signInMethod === 'otp'}
+                    className={`flex-1 rounded-md py-2 text-sm font-medium ${signInMethod === 'otp' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >Email code</button>
+                  <button
+                    type="button"
+                    onClick={() => { setSignInMethod('password'); setAlert(null); }}
+                    aria-pressed={signInMethod === 'password'}
+                    className={`flex-1 rounded-md py-2 text-sm font-medium ${signInMethod === 'password' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >Password</button>
+                </div>
+              )}
+
               <h2 className="text-xl font-semibold text-gray-900 mb-1">
                 {isSignin ? 'Welcome back' : 'Get started'}
               </h2>
               <p className="text-sm text-gray-500 mb-6">
                 {isSignin
-                  ? 'Enter your email to receive a sign-in code'
+                  ? signInMethod === 'password' ? 'Sign in with your email and password' : 'Enter your email to receive a sign-in code'
                   : 'Enter your email to create an account'}
               </p>
 
@@ -224,7 +264,10 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(onEmailSubmit)} className="space-y-5">
+              <form
+                onSubmit={handleSubmit(isSignin && signInMethod === 'password' ? onPasswordLogin : onEmailSubmit)}
+                className="space-y-5"
+              >
                 <Input
                   label="Email address"
                   type="email"
@@ -234,9 +277,21 @@ const AuthPage: React.FC = () => {
                   {...register('email')}
                 />
 
+                {isSignin && signInMethod === 'password' && (
+                  <Input
+                    label="Password"
+                    type="password"
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                  />
+                )}
+
                 <Button type="submit" fullWidth isLoading={isSubmitting} size="lg">
-                  <Mail className="h-4 w-4" />
-                  {isSignin ? 'Send sign-in code' : 'Send verification code'}
+                  {isSignin && signInMethod === 'password' ? 'Sign in' : (
+                    <><Mail className="h-4 w-4" />{isSignin ? 'Send sign-in code' : 'Send verification code'}</>
+                  )}
                 </Button>
               </form>
 

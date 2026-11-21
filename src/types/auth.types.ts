@@ -6,6 +6,33 @@ export interface SignInRequestDTO {
   email: string;
 }
 
+export interface PasswordLoginRequestDTO {
+  email: string;
+  password: string;
+}
+
+export interface PasswordRequestDTO {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface SessionDTO {
+  sessionId: number;
+  createdAt: string;
+  expiresAt: string;
+  deviceInfo: string | null;
+  revokedAt: string | null;
+}
+
+export interface SessionPageResponseDTO {
+  content: SessionDTO[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  lastPage: boolean;
+}
+
 export interface VerifyOtpRequestDTO {
   email: string;
   otp: string;
