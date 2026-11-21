@@ -21,8 +21,12 @@ export class ApiClientError extends Error {
   }
 }
 
+const API_BASE_URL = import.meta.env.DEV
+  ? ''
+  : 'https://avenqo-ecommerce-backend-production.up.railway.app';
+
 export const apiAxios = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
   timeout: 20000,
 });
@@ -49,9 +53,8 @@ export async function getOrRefreshToken(): Promise<string | null> {
 
   activeRefreshPromise = (async () => {
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
       const response = await axios.post<AuthenticationResponseDTO>(
-        `${baseUrl}${API_ENDPOINTS.AUTH.REFRESH}`,
+        `${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
         { refreshToken: currentRefresh.trim() },
         { headers: { 'Content-Type': 'application/json' } },
       );
