@@ -44,6 +44,7 @@ export const authService = {
       const response = await apiAxios.post<AuthenticationResponseDTO>(
         API_ENDPOINTS.AUTH.VERIFY_SIGNIN_OTP,
         dto,
+        { headers: { 'User-Agent': 'Avenquo Web/1.0' } },
       );
       return response.data;
     } catch (err) {
@@ -56,6 +57,7 @@ export const authService = {
       const response = await apiAxios.post<AuthenticationResponseDTO>(
         API_ENDPOINTS.AUTH.PASSWORD_LOGIN,
         dto,
+        { headers: { 'User-Agent': 'Avenquo Web/1.0' } },
       );
       return response.data;
     } catch (err) {
