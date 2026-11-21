@@ -13,7 +13,7 @@ export default defineConfig({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'https://avenqo-ecommerce-backend-production.up.railway.app',
         changeOrigin: true,
       },
     },
