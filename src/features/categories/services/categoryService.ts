@@ -18,7 +18,7 @@ export const categoryService = {
         params: {
           pageNumber: params?.pageNumber ?? 0,
           pageSize: params?.pageSize ?? 50,
-          sortBy: params?.sortBy ?? 'categoryName',
+          sortBy: params?.sortBy ?? 'categoryId',
           sortOrder: params?.sortOrder ?? 'asc',
         },
       });

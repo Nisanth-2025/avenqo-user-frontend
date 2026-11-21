@@ -76,10 +76,11 @@ export async function getOrRefreshToken(): Promise<string | null> {
 
 apiAxios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const isAuthEndpoint =
-    config.url?.includes('/api/v1/auth/user/signin') ||
-    config.url?.includes('/api/v1/auth/user/signup') ||
-    config.url?.includes('/api/v1/auth/user/refresh') ||
-    config.url?.includes('/api/v1/auth/user/verify');
+    config.url?.includes('/api/v1/auth/users/signin') ||
+    config.url?.includes('/api/v1/auth/users/signup') ||
+    config.url?.includes('/api/v1/auth/users/password-login') ||
+    config.url?.includes('/api/v1/auth/users/verify') ||
+    config.url?.includes('/api/v1/auth/sessions/refresh');
 
   if (!isAuthEndpoint) {
     try {
@@ -111,7 +112,7 @@ apiAxios.interceptors.response.use(
       const originalRequest = error.config as
         | (InternalAxiosRequestConfig & { _retry?: boolean })
         | undefined;
-      const isRefreshRequest = originalRequest?.url?.includes('/api/v1/auth/user/refresh');
+      const isRefreshRequest = originalRequest?.url?.includes('/api/v1/auth/sessions/refresh');
 
       if (originalRequest && !originalRequest._retry && !isRefreshRequest) {
         originalRequest._retry = true;
