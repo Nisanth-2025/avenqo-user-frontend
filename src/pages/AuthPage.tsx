@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,11 +11,17 @@ import { Alert } from '../components/ui/Alert';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { useOtpCountdown } from '../features/auth/hooks/useOtpCountdown';
 import { authService } from '../features/auth/services/authService';
+import { tokenStorage } from '../utils/tokenStorage';
 import { ApiClientError } from '../api/client';
 import type { AuthMode, AuthStep } from '../types/auth.types';
 
 const emailSchema = z.object({
-  email: z.string().min(1, 'Email is required').max(254).email('Please enter a valid email'),
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .max(254)
+    .email('Please enter a valid email')
+    .transform((val) => val.trim().toLowerCase()),
 });
 
 type EmailForm = z.infer<typeof emailSchema>;
@@ -66,6 +72,11 @@ const AuthPage: React.FC = () => {
     reset: resetForm,
   } = useForm<EmailForm>({ resolver: zodResolver(emailSchema) });
 
+  // Clear any stale/orphaned access and refresh tokens from storage when landing on the auth page
+  useEffect(() => {
+    tokenStorage.clearTokens();
+  }, []);
+
   /* ── mode switch ── */
   const switchMode = useCallback(
     (newMode: AuthMode) => {
@@ -92,18 +103,19 @@ const AuthPage: React.FC = () => {
   /* ── submit email (request OTP) ── */
   const onEmailSubmit = useCallback(
     async (data: EmailForm) => {
+      const normalizedEmail = data.email.trim().toLowerCase();
       setIsSubmitting(true);
       setAlert(null);
       try {
         if (mode === 'signup') {
-          await authService.signUp({ email: data.email });
+          await authService.signUp({ email: normalizedEmail });
         } else {
-          await authService.signIn({ email: data.email });
+          await authService.signIn({ email: normalizedEmail });
         }
-        setEmail(data.email);
+        setEmail(normalizedEmail);
         setStep('otp');
         startTimers();
-        setAlert({ type: 'info', message: `Verification code sent to ${data.email}` });
+        setAlert({ type: 'info', message: `Verification code sent to ${normalizedEmail}` });
       } catch (err) {
         const msg = err instanceof ApiClientError ? err.message : 'Something went wrong';
         setAlert({ type: 'error', message: msg });
@@ -115,6 +127,7 @@ const AuthPage: React.FC = () => {
   );
 
   const onPasswordLogin = useCallback(async (data: EmailForm) => {
+    const normalizedEmail = data.email.trim().toLowerCase();
     if (!password.trim()) {
       setAlert({ type: 'error', message: 'Password is required' });
       return;
@@ -122,7 +135,7 @@ const AuthPage: React.FC = () => {
     setIsSubmitting(true);
     setAlert(null);
     try {
-      const tokens = await authService.passwordLogin({ email: data.email, password });
+      const tokens = await authService.passwordLogin({ email: normalizedEmail, password });
       loginWithTokens(tokens);
       navigate('/home', { replace: true });
     } catch (err) {
@@ -135,20 +148,22 @@ const AuthPage: React.FC = () => {
 
   /* ── verify OTP ── */
   const onVerifyOtp = useCallback(async () => {
-    if (otp.length !== 6) return;
+    const cleanOtp = otp.trim();
+    if (cleanOtp.length !== 6) return;
+    const normalizedEmail = email.trim().toLowerCase();
     setIsSubmitting(true);
     setAlert(null);
     try {
       if (mode === 'signup') {
-        await authService.verifySignUpOtp({ email, otp });
+        await authService.verifySignUpOtp({ email: normalizedEmail, otp: cleanOtp });
         setAlert({ type: 'success', message: 'Account created! Sign in to continue.' });
         setStep('email');
         setMode('signin');
         setOtp('');
         resetTimers();
-        resetForm();
+        resetForm({ email: normalizedEmail });
       } else {
-        const tokens = await authService.verifySignInOtp({ email, otp });
+        const tokens = await authService.verifySignInOtp({ email: normalizedEmail, otp: cleanOtp });
         loginWithTokens(tokens);
         navigate('/home', { replace: true });
       }
@@ -163,13 +178,14 @@ const AuthPage: React.FC = () => {
 
   /* ── resend OTP ── */
   const onResend = useCallback(async () => {
+    const normalizedEmail = email.trim().toLowerCase();
     setIsSubmitting(true);
     setAlert(null);
     try {
       if (mode === 'signup') {
-        await authService.signUp({ email });
+        await authService.signUp({ email: normalizedEmail });
       } else {
-        await authService.signIn({ email });
+        await authService.signIn({ email: normalizedEmail });
       }
       startTimers();
       setOtp('');

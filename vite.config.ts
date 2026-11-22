@@ -15,6 +15,9 @@ export default defineConfig({
       '/api': {
         target: 'https://avenqo-ecommerce-backend-production.up.railway.app',
         changeOrigin: true,
+        headers: {
+          'User-Agent': 'Avenquo Web/1.0',
+        },
       },
     },
   },

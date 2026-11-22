@@ -99,7 +99,12 @@ apiAxios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => 
     config.url?.includes('/api/v1/auth/users/verify') ||
     config.url?.includes('/api/v1/auth/sessions/refresh');
 
-  if (!isAuthEndpoint) {
+  if (isAuthEndpoint) {
+    // Public authentication endpoints MUST NOT send an Authorization header.
+    // If an existing/expired Bearer token is attached, the backend's security filter
+    // attempts to authenticate it first and fails with "User not found".
+    config.headers.delete('Authorization');
+  } else {
     try {
       const validToken = await getOrRefreshToken();
       if (validToken) {
@@ -107,11 +112,6 @@ apiAxios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => 
       }
     } catch {
       /* let backend 401 handle redirection */
-    }
-  } else {
-    const existingToken = tokenStorage.getAccessToken();
-    if (existingToken && !config.headers.get('Authorization')) {
-      config.headers.set('Authorization', `Bearer ${existingToken}`);
     }
   }
 

@@ -14,7 +14,9 @@ import type {
 export const authService = {
   async signUp(dto: SignUpRequestDTO): Promise<string> {
     try {
-      const response = await apiAxios.post<string>(API_ENDPOINTS.AUTH.SIGN_UP, dto);
+      const response = await apiAxios.post<string>(API_ENDPOINTS.AUTH.SIGN_UP, {
+        email: dto.email.trim().toLowerCase(),
+      });
       return response.data;
     } catch (err) {
       throw extractApiError(err);
@@ -23,7 +25,10 @@ export const authService = {
 
   async verifySignUpOtp(dto: VerifyOtpRequestDTO): Promise<string> {
     try {
-      const response = await apiAxios.post<string>(API_ENDPOINTS.AUTH.VERIFY_SIGNUP_OTP, dto);
+      const response = await apiAxios.post<string>(API_ENDPOINTS.AUTH.VERIFY_SIGNUP_OTP, {
+        email: dto.email.trim().toLowerCase(),
+        otp: dto.otp.trim(),
+      });
       return response.data;
     } catch (err) {
       throw extractApiError(err);
@@ -32,7 +37,9 @@ export const authService = {
 
   async signIn(dto: SignInRequestDTO): Promise<string> {
     try {
-      const response = await apiAxios.post<string>(API_ENDPOINTS.AUTH.SIGN_IN, dto);
+      const response = await apiAxios.post<string>(API_ENDPOINTS.AUTH.SIGN_IN, {
+        email: dto.email.trim().toLowerCase(),
+      });
       return response.data;
     } catch (err) {
       throw extractApiError(err);
@@ -43,7 +50,10 @@ export const authService = {
     try {
       const response = await apiAxios.post<AuthenticationResponseDTO>(
         API_ENDPOINTS.AUTH.VERIFY_SIGNIN_OTP,
-        dto,
+        {
+          email: dto.email.trim().toLowerCase(),
+          otp: dto.otp.trim(),
+        },
         { headers: { 'User-Agent': 'Avenquo Web/1.0' } },
       );
       return response.data;
@@ -56,7 +66,10 @@ export const authService = {
     try {
       const response = await apiAxios.post<AuthenticationResponseDTO>(
         API_ENDPOINTS.AUTH.PASSWORD_LOGIN,
-        dto,
+        {
+          email: dto.email.trim().toLowerCase(),
+          password: dto.password,
+        },
         { headers: { 'User-Agent': 'Avenquo Web/1.0' } },
       );
       return response.data;
