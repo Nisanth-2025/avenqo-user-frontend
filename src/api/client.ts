@@ -21,11 +21,7 @@ export class ApiClientError extends Error {
   }
 }
 
-const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
-export const API_BASE_URL = (
-  configuredApiBaseUrl ||
-  (import.meta.env.DEV ? '' : 'https://avenquo-ecommerce-backend-production.up.railway.app')
-).replace(/\/+$/, '');
+export const API_BASE_URL = 'https://avenquo-ecommerce-backend-production.up.railway.app';
 
 const apiClientConfig = {
   baseURL: API_BASE_URL || undefined,
