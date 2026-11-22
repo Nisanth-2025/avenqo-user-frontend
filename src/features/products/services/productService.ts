@@ -1,4 +1,4 @@
-import { apiAxios, extractApiError } from '../../../api/client';
+import { publicApiAxios, extractApiError } from '../../../api/client';
 import { API_ENDPOINTS } from '../../../api/endpoints';
 import {
   ProductDTO,
@@ -14,7 +14,7 @@ export const productService = {
    */
   async listProducts(params?: ProductQueryParams): Promise<ProductPageResponseDTO> {
     try {
-      const response = await apiAxios.get<ProductPageResponseDTO>(API_ENDPOINTS.PRODUCTS.LIST, {
+      const response = await publicApiAxios.get<ProductPageResponseDTO>(API_ENDPOINTS.PRODUCTS.LIST, {
         params: {
           pageNumber: params?.pageNumber ?? 0,
           pageSize: params?.pageSize ?? 50,
@@ -34,7 +34,7 @@ export const productService = {
    */
   async getProductById(productId: number | string): Promise<ProductDTO> {
     try {
-      const response = await apiAxios.get<ProductDTO>(
+      const response = await publicApiAxios.get<ProductDTO>(
         API_ENDPOINTS.PRODUCTS.BY_ID(productId)
       );
       return response.data;
@@ -51,7 +51,7 @@ export const productService = {
     params: ProductKeywordSearchParams
   ): Promise<ProductPageResponseDTO> {
     try {
-      const response = await apiAxios.get<ProductPageResponseDTO>(API_ENDPOINTS.PRODUCTS.KEYWORD, {
+      const response = await publicApiAxios.get<ProductPageResponseDTO>(API_ENDPOINTS.PRODUCTS.KEYWORD, {
         params: {
           productName: params.productName.trim(),
           pageNumber: params.pageNumber ?? 0,
@@ -75,7 +75,7 @@ export const productService = {
     params?: ProductQueryParams
   ): Promise<ProductPageResponseDTO> {
     try {
-      const response = await apiAxios.get<ProductPageResponseDTO>(
+      const response = await publicApiAxios.get<ProductPageResponseDTO>(
         API_ENDPOINTS.CATEGORIES.PRODUCTS(categoryId),
         {
           params: {
