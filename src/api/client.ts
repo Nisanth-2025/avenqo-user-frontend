@@ -21,7 +21,18 @@ export class ApiClientError extends Error {
   }
 }
 
-export const API_BASE_URL = 'https://avenquo-ecommerce-backend-production.up.railway.app';
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+
+// When VITE_API_BASE_URL is not set, default to empty string ('') so all API calls
+// use same-origin relative paths (/api/...).
+// - In local development: Vite dev server proxy routes /api -> Railway backend.
+// - In production (Vercel): vercel.json rewrite routes /api/:path* -> Railway backend.
+// This prevents browser CORS errors (403 Forbidden) and connection failures.
+export const API_BASE_URL = (
+  configuredApiBaseUrl
+    ? configuredApiBaseUrl.replace('avenquo-ecommerce-backend-production.up.railway.app', 'avenqo-ecommerce-backend-production.up.railway.app')
+    : ''
+).replace(/\/+$/, '');
 
 const apiClientConfig = {
   baseURL: API_BASE_URL || undefined,
