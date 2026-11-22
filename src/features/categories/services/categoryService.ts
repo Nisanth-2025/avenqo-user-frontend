@@ -1,4 +1,4 @@
-import { apiAxios, extractApiError } from '../../../api/client';
+import { publicApiAxios, extractApiError } from '../../../api/client';
 import { API_ENDPOINTS } from '../../../api/endpoints';
 import {
   CategoryDTO,
@@ -14,7 +14,7 @@ export const categoryService = {
    */
   async listCategories(params?: CategoryListParams): Promise<CategoryPageResponseDTO> {
     try {
-      const response = await apiAxios.get<CategoryPageResponseDTO>(API_ENDPOINTS.CATEGORIES.LIST, {
+      const response = await publicApiAxios.get<CategoryPageResponseDTO>(API_ENDPOINTS.CATEGORIES.LIST, {
         params: {
           pageNumber: params?.pageNumber ?? 0,
           pageSize: params?.pageSize ?? 50,
@@ -34,7 +34,7 @@ export const categoryService = {
    */
   async getCategoryById(categoryId: number | string): Promise<CategoryDTO> {
     try {
-      const response = await apiAxios.get<CategoryDTO>(
+      const response = await publicApiAxios.get<CategoryDTO>(
         API_ENDPOINTS.CATEGORIES.BY_ID(categoryId)
       );
       return response.data;
@@ -52,7 +52,7 @@ export const categoryService = {
     params?: ProductQueryParams
   ): Promise<ProductPageResponseDTO> {
     try {
-      const response = await apiAxios.get<ProductPageResponseDTO>(
+      const response = await publicApiAxios.get<ProductPageResponseDTO>(
         API_ENDPOINTS.CATEGORIES.PRODUCTS(categoryId),
         {
           params: {

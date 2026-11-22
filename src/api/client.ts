@@ -21,10 +21,22 @@ export class ApiClientError extends Error {
   }
 }
 
-export const apiAxios = axios.create({
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+export const API_BASE_URL = (
+  configuredApiBaseUrl ||
+  (import.meta.env.DEV ? '' : 'https://avenquo-ecommerce-backend-production.up.railway.app')
+).replace(/\/+$/, '');
+
+const apiClientConfig = {
+  baseURL: API_BASE_URL || undefined,
   headers: { 'Content-Type': 'application/json' },
   timeout: 20000,
-});
+};
+
+export const apiAxios = axios.create(apiClientConfig);
+
+// Storefront product and category reads are public and should not depend on user sessions.
+export const publicApiAxios = axios.create(apiClientConfig);
 
 let activeRefreshPromise: Promise<string | null> | null = null;
 
@@ -49,7 +61,7 @@ export async function getOrRefreshToken(): Promise<string | null> {
   activeRefreshPromise = (async () => {
     try {
       const response = await axios.post<AuthenticationResponseDTO>(
-        API_ENDPOINTS.AUTH.REFRESH,
+        `${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
         { refreshToken: currentRefresh.trim() },
         { headers: { 'Content-Type': 'application/json' } },
       );
