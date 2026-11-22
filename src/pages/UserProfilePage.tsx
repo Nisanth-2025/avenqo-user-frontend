@@ -13,6 +13,7 @@ import {
   Trash2,
   User,
   ShieldCheck,
+  KeyRound,
   Mail,
   Check,
   Edit2,
@@ -388,12 +389,20 @@ export const UserProfilePage: React.FC = () => {
                   )}
                 </div>
               </div>
-              <Link
-                to="/security"
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-brand-300 hover:text-brand-700"
-              >
-                <ShieldCheck className="h-4 w-4" /> Manage password and sessions
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  to="/security/password"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-brand-300 hover:text-brand-700"
+                >
+                  <KeyRound className="h-4 w-4" /> Password
+                </Link>
+                <Link
+                  to="/security/sessions"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-brand-300 hover:text-brand-700"
+                >
+                  <ShieldCheck className="h-4 w-4" /> Sessions
+                </Link>
+              </div>
             </div>
 
             {/* Personal Information & Profile Fields */}

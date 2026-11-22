@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, KeyRound, Laptop, ShieldCheck } from 'lucide-react';
 import { UserNavbar } from '../components/navigation/UserNavbar';
@@ -17,6 +17,10 @@ export const AccountSecurityPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [page, setPage] = useState(0);
+  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+  const location = useLocation();
+  const showPasswordSection = location.pathname !== '/security/sessions';
+  const showSessionsSection = location.pathname !== '/security/password';
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { logout } = useAuth();
@@ -24,6 +28,7 @@ export const AccountSecurityPage: React.FC = () => {
   const sessionsQuery = useQuery({
     queryKey: ['account-sessions', page],
     queryFn: () => authService.listSessions(page, 10),
+    enabled: showSessionsSection,
   });
 
   const revokeSessionMutation = useMutation({
@@ -43,6 +48,7 @@ export const AccountSecurityPage: React.FC = () => {
       return;
     }
 
+    setIsPasswordSubmitting(true);
     try {
       const payload = { newPassword, confirmPassword };
       if (passwordMode === 'set') {
@@ -57,6 +63,8 @@ export const AccountSecurityPage: React.FC = () => {
       setConfirmPassword('');
     } catch (error) {
       setNotice({ type: 'error', message: error instanceof Error ? error.message : 'Unable to update your password.' });
+    } finally {
+      setIsPasswordSubmitting(false);
     }
   };
 
@@ -71,11 +79,14 @@ export const AccountSecurityPage: React.FC = () => {
             <ArrowLeft className="h-3.5 w-3.5" /> Back to profile
           </Link>
           <span>/</span>
-          <span className="font-semibold text-gray-900">Security</span>
+          <span className="font-semibold text-gray-900">
+            {showPasswordSection && showSessionsSection ? 'Security' : showPasswordSection ? 'Password' : 'Sessions'}
+          </span>
         </div>
 
         {notice && <div className="mb-5"><Alert variant={notice.type} message={notice.message} onClose={() => setNotice(null)} /></div>}
 
+        {showPasswordSection && (
         <section className="mb-6 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="password-heading">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><KeyRound className="size-5" /></div>
@@ -92,18 +103,24 @@ export const AccountSecurityPage: React.FC = () => {
             <Input label="New password" type="password" autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
             <Input label="Confirm new password" type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
             <p className="text-xs text-gray-500">8–72 characters, uppercase and lowercase letters, a number, and a special character. No spaces.</p>
-            <Button type="submit" disabled={revokeSessionMutation.isPending}>
+            <Button type="submit" disabled={isPasswordSubmitting}>
               {passwordMode === 'set' ? 'Set password' : 'Change password'}
             </Button>
           </form>
           {passwordMode === 'change' && <p className="mt-4 text-xs text-amber-700">Changing your password revokes all refresh sessions. You will be signed out and must sign in again.</p>}
         </section>
+        )}
 
+        {showSessionsSection && (
         <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8" aria-labelledby="sessions-heading">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700"><ShieldCheck className="size-5" /></div>
             <div>
-              <h2 id="sessions-heading" className="text-lg font-bold text-gray-900">Sessions</h2>
+              {showPasswordSection ? (
+                <h2 id="sessions-heading" className="text-lg font-bold text-gray-900">Sessions</h2>
+              ) : (
+                <h1 id="sessions-heading" className="text-lg font-bold text-gray-900">Sessions</h1>
+              )}
               <p className="text-sm text-gray-500">Review and revoke sessions for this account.</p>
             </div>
           </div>
@@ -160,6 +177,7 @@ export const AccountSecurityPage: React.FC = () => {
             </div>
           )}
         </section>
+        )}
       </main>
     </div>
   );

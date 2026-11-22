@@ -53,7 +53,14 @@ export const HomePage: React.FC = () => {
     sortOrder: 'asc',
   });
 
-  const { data: productData, isLoading: productsLoading, isFetching } = useBrowseProducts({
+  const {
+    data: productData,
+    isLoading: productsLoading,
+    isFetching,
+    isError: productsError,
+    error: productsQueryError,
+    refetch: refetchProducts,
+  } = useBrowseProducts({
     keyword: keyword || undefined,
     categoryId: selectedCategoryId,
     params: queryParams,
@@ -229,6 +236,8 @@ export const HomePage: React.FC = () => {
                   <option value="createdAt-asc">Oldest</option>
                   <option value="price-asc">Price: low to high</option>
                   <option value="price-desc">Price: high to low</option>
+                  <option value="specialPrice-asc">Sale price: low to high</option>
+                  <option value="specialPrice-desc">Sale price: high to low</option>
                   <option value="productName-asc">Name: A to Z</option>
                   <option value="productName-desc">Name: Z to A</option>
                 </select>
@@ -246,6 +255,23 @@ export const HomePage: React.FC = () => {
                   <div className="mt-2 h-3 w-1/3 animate-pulse rounded bg-[#eceae6]" />
                 </div>
               ))}
+            </div>
+          ) : productsError && products.length === 0 ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-8 text-center" role="alert">
+              <p className="text-sm font-semibold text-neutral-900">Products could not be loaded</p>
+              <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-neutral-600">
+                {productsQueryError instanceof Error
+                  ? productsQueryError.message
+                  : 'The product service is temporarily unavailable. Please try again.'}
+              </p>
+              <button
+                type="button"
+                disabled={isFetching}
+                onClick={() => void refetchProducts()}
+                className="mt-4 rounded-full border border-neutral-300 bg-white px-4 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50 disabled:opacity-60"
+              >
+                {isFetching ? 'Trying again…' : 'Try again'}
+              </button>
             </div>
           ) : products.length === 0 ? (
             <div className="py-16 text-center">

@@ -18,6 +18,12 @@ export interface AddressResponseDTO {
   updatedAt: string;
 }
 
+export interface AddressLocationIds {
+  countryId: number;
+  stateId: number;
+  districtId: number;
+}
+
 export interface CreateAddressRequestDTO {
   label: AddressLabel;
   recipientName: string;
@@ -27,7 +33,7 @@ export interface CreateAddressRequestDTO {
   landmark?: string;
   city: string;
   state: string;
-  country: 'INDIA';
+  country: string;
   pincode: string;
 }
 
