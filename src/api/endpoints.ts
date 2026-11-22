@@ -45,8 +45,21 @@ export const API_ENDPOINTS = {
     PRODUCT_QUANTITY:   (productId: number | string, quantity: number) => `/api/v1/cart/products/${productId}/quantity/${quantity}`,
     PRODUCT:            (productId: number | string) => `/api/v1/cart/products/${productId}`,
   },
+  LOCATIONS: {
+    COUNTRIES:          '/api/v1/locations/countries',
+    STATES:             (countryId: number | string) => `/api/v1/locations/countries/${countryId}/states`,
+    DISTRICTS:          (stateId: number | string) => `/api/v1/locations/states/${stateId}/districts`,
+  },
   ADDRESSES: {
     BASE:               '/api/v1/addresses',
+    CREATE: (countryId: number | string, stateId: number | string, districtId: number | string) =>
+      `/api/v1/addresses/${countryId}/${stateId}/${districtId}`,
+    UPDATE: (
+      addressId: number | string,
+      countryId: number | string,
+      stateId: number | string,
+      districtId: number | string,
+    ) => `/api/v1/addresses/${addressId}/${countryId}/${stateId}/${districtId}`,
     BY_ID:              (addressId: number | string) => `/api/v1/addresses/${addressId}`,
     DEFAULT_SHIPPING:   (addressId: number | string) => `/api/v1/addresses/${addressId}/default-shipping`,
     DEFAULT_BILLING:    (addressId: number | string) => `/api/v1/addresses/${addressId}/default-billing`,

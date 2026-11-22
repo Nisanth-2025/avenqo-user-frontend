@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { UserNavbar } from '../components/navigation/UserNavbar';
 import { useUserAddresses } from '../features/addresses/hooks/useUserAddresses';
+import { useCountries, useDistricts, useStates } from '../features/addresses/hooks/useLocations';
+import { locationQueryKeys, locationService } from '../features/addresses/services/locationService';
 import {
   AddressResponseDTO,
+  AddressLocationIds,
   CreateAddressRequestDTO,
-  UpdateAddressRequestDTO,
   AddressLabel,
 } from '../types/address.types';
 import { ApiClientError } from '../api/client';
@@ -59,17 +62,12 @@ const addressSchema = z.object({
     .max(30, 'Landmark cannot exceed 30 characters')
     .optional()
     .or(z.literal('')),
-  city: z
-    .string()
-    .min(1, 'City is required')
-    .max(25, 'City cannot exceed 25 characters'),
-  state: z
-    .string()
-    .min(1, 'State is required')
-    .max(25, 'State cannot exceed 25 characters'),
-  country: z.literal('INDIA'),
+  countryId: z.string().min(1, 'Please select a country'),
+  stateId: z.string().min(1, 'Please select a state'),
+  districtId: z.string().min(1, 'Please select a district / city'),
   pincode: z
     .string()
+    .trim()
     .min(1, 'Pincode is required')
     .max(6, 'Pincode cannot exceed 6 characters'),
 });
@@ -103,11 +101,15 @@ export const UserAddressesPage: React.FC = () => {
   );
   const [formError, setFormError] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
+  const countriesQuery = useCountries();
   const {
     register,
     handleSubmit,
     reset,
     setError,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),
@@ -118,12 +120,28 @@ export const UserAddressesPage: React.FC = () => {
       line1: '',
       line2: '',
       landmark: '',
-      city: '',
-      state: '',
-      country: 'INDIA',
+      countryId: '',
+      stateId: '',
+      districtId: '',
       pincode: '',
     },
   });
+  const selectedCountryId = watch('countryId');
+  const selectedStateId = watch('stateId');
+  const statesQuery = useStates(selectedCountryId);
+  const districtsQuery = useDistricts(selectedStateId);
+  const countries = countriesQuery.data ?? [];
+
+  useEffect(() => {
+    if (!isModalOpen || addressToEdit || selectedCountryId || countries.length === 0) return;
+    const defaultCountry =
+      countries.find((country) => country.iso2Code.toUpperCase() === 'IN') ??
+      countries.find((country) => country.name.trim().toLowerCase() === 'india') ??
+      countries[0];
+    if (defaultCountry) {
+      setValue('countryId', String(defaultCountry.countryId), { shouldValidate: true });
+    }
+  }, [addressToEdit, countries, isModalOpen, selectedCountryId, setValue]);
 
   const openCreateModal = () => {
     setAddressToEdit(null);
@@ -135,85 +153,118 @@ export const UserAddressesPage: React.FC = () => {
       line1: '',
       line2: '',
       landmark: '',
-      city: '',
-      state: '',
-      country: 'INDIA',
+      countryId: '',
+      stateId: '',
+      districtId: '',
       pincode: '',
     });
     setIsModalOpen(true);
   };
 
-  const openEditModal = (addr: AddressResponseDTO) => {
-    setAddressToEdit(addr);
+  const openEditModal = async (addr: AddressResponseDTO) => {
     setFormError(null);
-    const raw = addr.recipientPhone || '';
-    const digits = raw.startsWith('+91') ? raw.slice(3) : raw;
-    reset({
-      label: addr.label,
-      recipientName: addr.recipientName,
-      phone10: digits,
-      line1: addr.line1,
-      line2: addr.line2 || '',
-      landmark: addr.landmark || '',
-      city: addr.city,
-      state: addr.state,
-      country: 'INDIA',
-      pincode: addr.pincode,
-    });
-    setIsModalOpen(true);
+    const normalize = (value: string) => value.trim().toLocaleLowerCase();
+
+    try {
+      const fetchedCountries = await queryClient.fetchQuery({
+        queryKey: locationQueryKeys.countries,
+        queryFn: () => locationService.listCountries(),
+        staleTime: 30 * 60 * 1000,
+      });
+      const countryList = countriesQuery.data ?? fetchedCountries ?? [];
+      const country = countryList.find((item) => normalize(item.name) === normalize(addr.country));
+      if (!country) throw new Error('Could not match this address country to a saved location.');
+
+      const states = await queryClient.fetchQuery({
+        queryKey: locationQueryKeys.states(country.countryId),
+        queryFn: () => locationService.listStates(country.countryId),
+        staleTime: 30 * 60 * 1000,
+      });
+      const state = states.find((item) => normalize(item.name) === normalize(addr.state));
+      const districts = state
+        ? await queryClient.fetchQuery({
+            queryKey: locationQueryKeys.districts(state.stateId),
+            queryFn: () => locationService.listDistricts(state.stateId),
+            staleTime: 30 * 60 * 1000,
+          })
+        : [];
+      const district = districts.find((item) => normalize(item.name) === normalize(addr.city));
+      const raw = addr.recipientPhone || '';
+      const digits = raw.startsWith('+91') ? raw.slice(3) : raw;
+
+      setAddressToEdit(addr);
+      reset({
+        label: addr.label,
+        recipientName: addr.recipientName,
+        phone10: digits,
+        line1: addr.line1,
+        line2: addr.line2 || '',
+        landmark: addr.landmark || '',
+        countryId: String(country.countryId),
+        stateId: state ? String(state.stateId) : '',
+        districtId: district ? String(district.districtId) : '',
+        pincode: addr.pincode,
+      });
+      setIsModalOpen(true);
+      if (!state || !district) {
+        setFormError('Please select the matching state and district for this saved address before updating it.');
+      }
+    } catch (error) {
+      setNotice({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Unable to load location choices for this address.',
+      });
+    }
   };
 
   const onSubmitForm = async (values: AddressFormValues) => {
     setFormError(null);
-    const formattedPhone = `+91${values.phone10.trim()}`;
+    const countryId = Number(values.countryId);
+    const stateId = Number(values.stateId);
+    const districtId = Number(values.districtId);
+    const country = countries.find((item) => item.countryId === countryId);
+    const state = statesQuery.data?.find((item) => item.stateId === stateId);
+    const district = districtsQuery.data?.find((item) => item.districtId === districtId);
+
+    if (!country || !state || !district) {
+      setFormError('Please select a valid country, state, and district / city.');
+      return;
+    }
+
+    const locationIds: AddressLocationIds = { countryId, stateId, districtId };
+    const payload: CreateAddressRequestDTO = {
+      label: values.label,
+      recipientName: values.recipientName.trim(),
+      recipientPhone: `+91${values.phone10.trim()}`,
+      line1: values.line1.trim(),
+      line2: values.line2?.trim() || undefined,
+      landmark: values.landmark?.trim() || undefined,
+      city: district.name,
+      state: state.name,
+      country: country.name,
+      pincode: values.pincode.trim(),
+    };
 
     try {
       if (addressToEdit) {
-        // Update
-        const payload: UpdateAddressRequestDTO = {
-          label: values.label,
-          recipientName: values.recipientName.trim(),
-          recipientPhone: formattedPhone,
-          line1: values.line1.trim(),
-          line2: values.line2?.trim() || undefined,
-          landmark: values.landmark?.trim() || undefined,
-          city: values.city.trim(),
-          state: values.state.trim(),
-          country: 'INDIA',
-          pincode: values.pincode.trim(),
-        };
-
         await updateMutation.mutateAsync({
           addressId: addressToEdit.id,
           data: payload,
+          locationIds,
         });
-
         setNotice({ type: 'success', message: 'Address updated successfully.' });
       } else {
-        // Create
-        const payload: CreateAddressRequestDTO = {
-          label: values.label,
-          recipientName: values.recipientName.trim(),
-          recipientPhone: formattedPhone,
-          line1: values.line1.trim(),
-          line2: values.line2?.trim() || undefined,
-          landmark: values.landmark?.trim() || undefined,
-          city: values.city.trim(),
-          state: values.state.trim(),
-          country: 'INDIA',
-          pincode: values.pincode.trim(),
-        };
-
-        await createMutation.mutateAsync(payload);
+        await createMutation.mutateAsync({ data: payload, locationIds });
         setNotice({ type: 'success', message: 'New address added successfully.' });
       }
-
       setIsModalOpen(false);
     } catch (err: unknown) {
       if (err instanceof ApiClientError) {
         if (err.fieldErrors) {
-          Object.entries(err.fieldErrors).forEach(([field, msg]) => {
-            setError(field as keyof AddressFormValues, { message: msg });
+          Object.entries(err.fieldErrors).forEach(([field, message]) => {
+            if (field in addressSchema.shape) {
+              setError(field as keyof AddressFormValues, { message });
+            }
           });
         }
         setFormError(err.message);
@@ -614,39 +665,57 @@ export const UserAddressesPage: React.FC = () => {
                 />
               </div>
 
-              {/* City, State, Pincode */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <Input
-                    label="City *"
-                    placeholder="e.g. Mumbai"
-                    error={errors.city?.message}
-                    hint="Max 25 characters"
-                    {...register('city')}
-                  />
-                </div>
-
-                <div>
-                  <Input
-                    label="State *"
-                    placeholder="e.g. Maharashtra"
-                    error={errors.state?.message}
-                    hint="Max 25 characters"
-                    {...register('state')}
-                  />
-                </div>
-
-                <div>
-                  <Input
-                    label="PIN Code *"
-                    placeholder="e.g. 400001"
-                    maxLength={6}
-                    error={errors.pincode?.message}
-                    hint="Max 6 characters"
-                    {...register('pincode')}
-                  />
-                </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <Select
+                  label="Country *"
+                  options={[
+                    { value: '', label: countriesQuery.isLoading ? 'Loading countries…' : 'Select country' },
+                    ...countries.map((country) => ({ value: String(country.countryId), label: country.name })),
+                  ]}
+                  error={errors.countryId?.message}
+                  hint={countriesQuery.isError ? 'Could not load countries. Please reopen this form to retry.' : undefined}
+                  disabled={countriesQuery.isLoading || countries.length === 0}
+                  {...register('countryId', {
+                    onChange: () => {
+                      setValue('stateId', '', { shouldValidate: true });
+                      setValue('districtId', '', { shouldValidate: true });
+                    },
+                  })}
+                />
+                <Select
+                  label="State *"
+                  options={[
+                    { value: '', label: statesQuery.isLoading ? 'Loading states…' : 'Select state' },
+                    ...(statesQuery.data ?? []).map((state) => ({ value: String(state.stateId), label: state.name })),
+                  ]}
+                  error={errors.stateId?.message}
+                  hint={statesQuery.isError ? 'Could not load states. Please change the country and try again.' : undefined}
+                  disabled={!selectedCountryId || statesQuery.isLoading}
+                  {...register('stateId', {
+                    onChange: () => setValue('districtId', '', { shouldValidate: true }),
+                  })}
+                />
+                <Select
+                  label="District / City *"
+                  options={[
+                    { value: '', label: districtsQuery.isLoading ? 'Loading districts…' : 'Select district / city' },
+                    ...(districtsQuery.data ?? []).map((district) => ({ value: String(district.districtId), label: district.name })),
+                  ]}
+                  error={errors.districtId?.message}
+                  hint={districtsQuery.isError ? 'Could not load districts. Please choose the state again.' : undefined}
+                  disabled={!selectedStateId || districtsQuery.isLoading}
+                  {...register('districtId')}
+                />
               </div>
+
+              <Input
+                label="PIN Code *"
+                placeholder="e.g. 560001"
+                maxLength={6}
+                error={errors.pincode?.message}
+                hint="Up to 6 characters"
+                {...register('pincode')}
+              />
             </form>
 
             {/* Modal Footer */}

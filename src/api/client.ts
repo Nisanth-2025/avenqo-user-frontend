@@ -134,28 +134,33 @@ export function extractApiError(err: unknown): ApiClientError {
     const data = err.response?.data as ApiErrorBody | undefined;
     const status = err.response?.status ?? 0;
 
+    if (typeof data?.message === 'string' && data.message.trim()) {
+      return new ApiClientError(data.message, status);
+    }
+
     if (data) {
-      const hasMessage = typeof data.message === 'string';
-      if (!hasMessage) {
-        const fieldErrors: Record<string, string> = {};
-        let first = '';
-        for (const [k, v] of Object.entries(data)) {
-          if (typeof v === 'string') {
-            fieldErrors[k] = v;
-            if (!first) first = v;
-          }
-        }
-        if (Object.keys(fieldErrors).length > 0)
-          return new ApiClientError(first || 'Validation error', status, fieldErrors);
-      }
-      if (hasMessage && typeof data.message === 'string')
-        return new ApiClientError(data.message, status);
+      const metadataFields = new Set(['timestamp', 'status', 'error', 'path', 'trace', 'exception']);
+      const fieldErrors = Object.fromEntries(
+        Object.entries(data).filter(
+          ([key, value]) => typeof value === 'string' && !metadataFields.has(key),
+        ),
+      ) as Record<string, string>;
+      const firstFieldError = Object.values(fieldErrors)[0];
+      if (firstFieldError) return new ApiClientError(firstFieldError, status, fieldErrors);
     }
 
     if (err.code === 'ECONNABORTED')
       return new ApiClientError('Request timed out. Please try again.', 0);
 
-    return new ApiClientError(err.message || 'Network error', status);
+    if (status >= 500) {
+      return new ApiClientError('The server could not complete the request. Please try again.', status);
+    }
+
+    if (!err.response) {
+      return new ApiClientError('Unable to reach the server. Check your connection and try again.', 0);
+    }
+
+    return new ApiClientError(err.message || 'Request failed. Please try again.', status);
   }
   if (err instanceof Error) return new ApiClientError(err.message, 0);
   return new ApiClientError('An unexpected error occurred', 0);

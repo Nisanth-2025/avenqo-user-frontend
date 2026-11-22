@@ -37,13 +37,20 @@ export const addressService = {
 
   /**
    * Create a new address (up to 5 per user).
-   * POST /api/v1/addresses
+   * POST /api/v1/addresses/{countryId}/{stateId}/{districtId}
    */
-  async createAddress(data: CreateAddressRequestDTO): Promise<AddressResponseDTO> {
+  async createAddress(
+    data: CreateAddressRequestDTO,
+    locationIds: { countryId: number; stateId: number; districtId: number },
+  ): Promise<AddressResponseDTO> {
     try {
       const response = await apiAxios.post<AddressResponseDTO>(
-        API_ENDPOINTS.ADDRESSES.BASE,
-        data
+        API_ENDPOINTS.ADDRESSES.CREATE(
+          locationIds.countryId,
+          locationIds.stateId,
+          locationIds.districtId,
+        ),
+        data,
       );
       return response.data;
     } catch (err) {
@@ -53,16 +60,22 @@ export const addressService = {
 
   /**
    * Partial update an existing address.
-   * PUT /api/v1/addresses/{addressId}
+   * PUT /api/v1/addresses/{addressId}/{countryId}/{stateId}/{districtId}
    */
   async updateAddress(
     addressId: number | string,
-    data: UpdateAddressRequestDTO
+    data: UpdateAddressRequestDTO,
+    locationIds: { countryId: number; stateId: number; districtId: number },
   ): Promise<AddressResponseDTO> {
     try {
       const response = await apiAxios.put<AddressResponseDTO>(
-        API_ENDPOINTS.ADDRESSES.BY_ID(addressId),
-        data
+        API_ENDPOINTS.ADDRESSES.UPDATE(
+          addressId,
+          locationIds.countryId,
+          locationIds.stateId,
+          locationIds.districtId,
+        ),
+        data,
       );
       return response.data;
     } catch (err) {

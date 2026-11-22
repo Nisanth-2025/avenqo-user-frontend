@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { addressService } from '../services/addressService';
 import {
+  AddressLocationIds,
   CreateAddressRequestDTO,
   UpdateAddressRequestDTO,
 } from '../../../types/address.types';
@@ -21,7 +22,8 @@ export function useUserAddresses() {
   };
 
   const createMutation = useMutation({
-    mutationFn: (data: CreateAddressRequestDTO) => addressService.createAddress(data),
+    mutationFn: ({ data, locationIds }: { data: CreateAddressRequestDTO; locationIds: AddressLocationIds }) =>
+      addressService.createAddress(data, locationIds),
     onSuccess: invalidate,
   });
 
@@ -29,10 +31,12 @@ export function useUserAddresses() {
     mutationFn: ({
       addressId,
       data,
+      locationIds,
     }: {
       addressId: number | string;
       data: UpdateAddressRequestDTO;
-    }) => addressService.updateAddress(addressId, data),
+      locationIds: AddressLocationIds;
+    }) => addressService.updateAddress(addressId, data, locationIds),
     onSuccess: invalidate,
   });
 

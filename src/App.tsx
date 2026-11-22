@@ -24,7 +24,9 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<HomePage />} />
           <Route path="/profile" element={<UserProfilePage />} />
-          <Route path="/security" element={<AccountSecurityPage />} />
+          <Route path="/security/password" element={<AccountSecurityPage />} />
+          <Route path="/security/sessions" element={<AccountSecurityPage />} />
+          <Route path="/security" element={<Navigate to="/security/password" replace />} />
           <Route path="/addresses" element={<UserAddressesPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route

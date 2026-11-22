@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useUserProfile } from '../../features/profile/hooks/useUserProfile';
-import { Search, User, MapPin, LogOut, ShoppingBag, ShoppingCart, X } from 'lucide-react';
+import { Search, User, MapPin, LogOut, ShoppingBag, ShoppingCart, X, KeyRound, ShieldCheck } from 'lucide-react';
 import { useCart } from '../../features/cart/hooks/useCart';
 
 interface UserNavbarProps {
@@ -159,6 +159,22 @@ export const UserNavbar: React.FC<UserNavbarProps> = ({
                 >
                   <MapPin className="h-4 w-4 text-neutral-500" strokeWidth={1.5} />
                   Addresses
+                </Link>
+                <Link
+                  to="/security/password"
+                  onClick={() => setIsDropdownOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-neutral-800 hover:bg-neutral-50"
+                >
+                  <KeyRound className="h-4 w-4 text-neutral-500" strokeWidth={1.5} />
+                  Password
+                </Link>
+                <Link
+                  to="/security/sessions"
+                  onClick={() => setIsDropdownOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-neutral-800 hover:bg-neutral-50"
+                >
+                  <ShieldCheck className="h-4 w-4 text-neutral-500" strokeWidth={1.5} />
+                  Sessions
                 </Link>
                 <button
                   type="button"
